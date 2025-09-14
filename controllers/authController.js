@@ -56,7 +56,7 @@ export const logout = catchAsyncErrors(async(req, res, next) => {
     sameSite: isProd ? "none" : "lax",
     path: "/",
     expires: new Date(0),
-    domain: isProd ? process.env.FRONTEND_URL : undefined
+    // domain: isProd ? new URL(process.env.FRONTEND_URL).hostname : undefined
 });
 
     res.status(200).json({

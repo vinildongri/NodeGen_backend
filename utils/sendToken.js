@@ -13,7 +13,7 @@ export default (user, statusCode, res) => {
         secure: isProd,      
         sameSite: isProd ? 'none' : 'lax',
         path: "/",
-        domain: isProd ? process.env.FRONTEND_URL : undefined
+        // domain: isProd ? new URL(process.env.FRONTEND_URL).hostname : undefined
     }
 
     res.status(statusCode).cookie("token", token, options).json({
