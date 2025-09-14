@@ -49,13 +49,14 @@ export const loginUser = catchAsyncErrors(async(req, res, next) => {
 
 // Logout User => /api/v1/logout
 export const logout = catchAsyncErrors(async(req, res, next) => {
+    const isProd = process.env.NODE_ENV === "PRODUCTION"
     res.cookie("token", "", {
-        expires: new Date(0),
-        httpOnly: true,
-        secure: true,  
-        sameSite: 'none',
-        path: "/",      
-    });
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+    expires: new Date(0),
+});
 
     res.status(200).json({
         message: "Logged Out",
