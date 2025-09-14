@@ -24,7 +24,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true })); // <-- parse URL-encoded bodies
 app.use(cookieParser());
 
 // importing all routes

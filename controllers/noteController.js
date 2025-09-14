@@ -8,12 +8,19 @@ const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 // Creating Notes from Prompt => /api/v1/notes
 export const createNotes = catchAsyncErrors(async (req, res, next) => {
-  const { messages } = req.body; 
-  // 👆 Now expect an array like: 
-  // [ { role: "user", content: "Hello" }, { role: "bot", content: "Hi Vinil" } ]
+  let { messages, prompt } = req.body;
+
+  // If only prompt is provided, convert it into messages array
+  if (!messages && prompt) {
+    if (Array.isArray(prompt)) {
+      messages = prompt.map((p) => ({ role: "user", content: p }));
+    } else {
+      messages = [{ role: "user", content: prompt }];
+    }
+  }
 
   if (!messages || !Array.isArray(messages)) {
-    return next(new ErrorHandler("Please send messages array", 400));
+    return next(new ErrorHandler("Please send messages array or prompt", 400));
   }
 
   // Convert into Gemini-friendly "contents" format
@@ -22,10 +29,24 @@ export const createNotes = catchAsyncErrors(async (req, res, next) => {
     parts: [{ text: msg.content }],
   }));
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash-001",
-    contents,
-  });
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-001",
+      contents,
+    });
+  } catch (err) {
+    // ✅ Detect network errors specifically
+    if (
+      err.code === "ENOTFOUND" ||
+      err.code === "ECONNREFUSED" ||
+      (err.message && err.message.toLowerCase().includes("fetch"))
+    ) {
+      return next(new ErrorHandler("Network error – check your connection", 503));
+    }
+
+    return next(new ErrorHandler(err.message || "Something went wrong", 500));
+  }
 
   if (process.env.NODE_ENV === "DEVELOPMENT") {
     return res.status(200).json({
@@ -35,7 +56,7 @@ export const createNotes = catchAsyncErrors(async (req, res, next) => {
   }
 
   if (process.env.NODE_ENV === "PRODUCTION") {
-    const notes = response.candidates[0].content.parts[0].text;
+    const notes = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
     return res.status(200).json({
       success: true,
       result: notes,
