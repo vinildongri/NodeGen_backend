@@ -12,7 +12,8 @@ export default (user, statusCode, res) => {
         httpOnly: true,
         secure: isProd,      
         sameSite: isProd ? 'none' : 'lax',
-        path: "/"
+        path: "/",
+        domain: isProd ? process.env.FRONTEND_URL : undefined
     }
 
     res.status(statusCode).cookie("token", token, options).json({
