@@ -48,21 +48,23 @@ export const loginUser = catchAsyncErrors(async(req, res, next) => {
 
 
 // Logout User => /api/v1/logout
-export const logout = catchAsyncErrors(async(req, res, next) => {
-    const isProd = process.env.NODE_ENV === "PRODUCTION"
-    res.cookie("token", "", {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? "none" : "lax",
-    path: "/",
-    expires: new Date(0),
-    // domain: isProd ? new URL(process.env.FRONTEND_URL).hostname : undefined
-});
+export const logout = catchAsyncErrors(async (req, res, next) => {
+    const isProd = process.env.NODE_ENV === "PRODUCTION";
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        path: "/",
+        // domain: isProd ? new URL(process.env.FRONTEND_URL).hostname : undefined
+    });
 
     res.status(200).json({
-        message: "Logged Out",
+        success: true,
+        message: "Logged Out Successfully",
     });
 });
+
 
 
 
