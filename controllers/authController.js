@@ -57,6 +57,7 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
         sameSite: isProd ? "none" : "lax",
         path: "/",
         // domain: isProd ? new URL(process.env.FRONTEND_URL).hostname : undefined
+        // domain: "note-gen-frontend.vercel.app",
     });
 
     res.status(200).json({

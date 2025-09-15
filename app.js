@@ -21,7 +21,7 @@ connectDatabase();
 // CORS setup
 app.use(cors({
   origin: process.env.FRONTEND_URL,  // your frontend URL
-  credentials: true
+  credentials: true,
 }));
 
 // Body parsers with larger size limit
