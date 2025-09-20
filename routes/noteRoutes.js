@@ -5,7 +5,7 @@ import { isAuthenticatedUser } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.route("/notes").post( isAuthenticatedUser, createNotes);
+router.route("/notes").post( createNotes);
 // router.route.post("/notes", upload.single("pdf"), createNotes);
 
 // router.route("/notes/pdf").post( isAuthenticatedUser, searchPdf);
