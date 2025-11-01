@@ -4,6 +4,12 @@ import cors from "cors";
 import { connectDatabase } from "./config/dbConnect.js";
 import errorMiddleware from "./middleware/errors.js";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Setup __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Handle Uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -35,11 +41,6 @@ import authRoutes from "./routes/auth.js";
 
 app.use("/api/v1", authRoutes);
 app.use("/api/v1", createNotes);
-
-// Health check route
-app.get("/api/v1/health", (req, res) => {
-    res.status(200).json({ message: `Server is healthy. Environment = ${process.env.NODE_ENV}` });
-});
 
 // Using Error Middleware
 app.use(errorMiddleware);

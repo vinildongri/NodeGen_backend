@@ -10,7 +10,7 @@ const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 export const createNotes = catchAsyncErrors(async (req, res, next) => {
   let { messages, prompt } = req.body;
 
-  // If only prompt is provided, convert it into messages array
+  // Convert prompt to messages if needed
   if (!messages && prompt) {
     if (Array.isArray(prompt)) {
       messages = prompt.map((p) => ({ role: "user", content: p }));
@@ -36,7 +36,17 @@ export const createNotes = catchAsyncErrors(async (req, res, next) => {
       contents,
     });
   } catch (err) {
-    // ✅ Detect network errors specifically
+    console.error("Gemini API Error:", err);
+
+    // ✅ Detect quota exceeded
+    if (err?.message?.includes("RESOURCE_EXHAUSTED") || err?.code === 429) {
+      return res.status(429).json({
+        message: "Quota exceeded. Please retry later or upgrade your plan.",
+        details: err?.response?.data || err.message,
+      });
+    }
+
+    // Network errors
     if (
       err.code === "ENOTFOUND" ||
       err.code === "ECONNREFUSED" ||
@@ -45,27 +55,15 @@ export const createNotes = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Network error – check your connection", 503));
     }
 
+    // Fallback for other errors
     return next(new ErrorHandler(err.message || "Something went wrong", 500));
   }
 
-  if (process.env.NODE_ENV === "DEVELOPMENT") {
-    // return res.status(200).json({
-    //   success: true,
-    //   result: response,
-    // });
-     
-    const notes = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    return res.status(200).json({
-      success: true,
-      result: notes,
-    });
-  }
+  // Extract text safely
+  const notes = response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-  if (process.env.NODE_ENV === "PRODUCTION") {
-    const notes = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    return res.status(200).json({
-      success: true,
-      result: notes,
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    result: notes,
+  });
 });
