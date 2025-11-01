@@ -87,7 +87,7 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
     const message = getResetPasswordTemplate(user?.name, resetUrl);
     
-    console.log("🔗 Reset URL:", resetUrl);
+    // console.log("🔗 Reset URL:", resetUrl);
     
 
     try{
